@@ -14,7 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ncba.loop.model.Card;
+import com.ncba.loop.model.CardResponseDTO;
 import com.ncba.loop.repository.CardRepository;
+import com.ncba.loop.service.CardService;
+
+import jakarta.persistence.EntityNotFoundException;
 
 
 @RestController
@@ -22,6 +26,10 @@ import com.ncba.loop.repository.CardRepository;
 public class CardController {
 	 @Autowired
 	  private CardRepository cardRepository;
+	 
+	 @Autowired
+	  private CardService cardService;
+	 
 
 	  @GetMapping("/ping-card")
 	  public String ping() {
@@ -31,14 +39,30 @@ public class CardController {
 	  
 	  
 	  @PostMapping("/create-card")
-	  public Card createCard(@RequestBody Card cardInfo) {
-	    return cardRepository.save(cardInfo);
+	  public ResponseEntity<CardResponseDTO> createCard(@RequestBody Card cardInfo) {
+		  return cardService.createCard(cardInfo);
+	   // return cardRepository.save(cardInfo);
 	  }
 	  
-	  @GetMapping("getcard-by-id/{id}")
-	  public Card getCardById(@PathVariable Long id) {
-	    return cardRepository.findById(id).get();
+	  
+	  
+	  
+	  @GetMapping("/cards/{id}")
+	  public ResponseEntity<CardResponseDTO> getCardById(@PathVariable Long id) {
+	      Card card = cardRepository.findById(id)
+	              .orElseThrow(() -> new EntityNotFoundException("Card not found with id: " + id));
+
+	      CardResponseDTO responseDTO = card.toResponseDTO();
+	      return ResponseEntity.ok(responseDTO);
 	  }
+	  
+	  
+	  
+	  
+//	  @GetMapping("getcard-by-id/{id}")
+//	  public Card getCardById(@PathVariable Long id) {
+//	    return cardRepository.findById(id).get();
+//	  }
 	  
 	  @PostMapping("/create-cards")
 	  public List<Card> createCards(@RequestBody List<Card> cardList) {
@@ -56,8 +80,6 @@ public class CardController {
 	        return cardRepository.findById(cardId)
 	                .map(existingCard -> {
 	                    existingCard.setCardAlias(updatedCard.getCardAlias());
-	                    existingCard.setCardType(updatedCard.getCardType());
-
 	                    Card savedCard = cardRepository.save(existingCard);
 	                    return ResponseEntity.ok().body(savedCard);
 	                })

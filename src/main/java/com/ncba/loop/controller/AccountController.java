@@ -2,6 +2,7 @@ package com.ncba.loop.controller;
 
 import java.util.List;
 
+import org.apache.el.stream.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -62,14 +63,37 @@ public class AccountController {
 	                .orElseGet(() -> ResponseEntity.notFound().build());
 	  }
 	  
+//	  @DeleteMapping("/delete-account/{accountId}")
+//	    public ResponseEntity<Object> deleteAccount(@PathVariable Long accountId) {
+//	        return accountRepository.findById(accountId)
+//	                .map(existingAccount -> {
+//	                    accountRepository.deleteById(accountId);
+//	                    return ResponseEntity.noContent().build();
+//	                })
+//	                .orElseGet(() -> ResponseEntity.notFound().build());
+//	    }
+	  
+	  
 	  @DeleteMapping("/delete-account/{accountId}")
-	    public ResponseEntity<Object> deleteAccount(@PathVariable Long accountId) {
-	        return accountRepository.findById(accountId)
-	                .map(existingAccount -> {
-	                    accountRepository.deleteById(accountId);
-	                    return ResponseEntity.noContent().build();
-	                })
-	                .orElseGet(() -> ResponseEntity.notFound().build());
-	    }
+	  public ResponseEntity<Object> deleteAccount(@PathVariable Long accountId) {
+	      java.util.Optional<Account> accountOptional = accountRepository.findById(accountId);
+	      
+	      if (accountOptional.isPresent()) {
+	          Account existingAccount = accountOptional.get();
+	          
+	          // Additional logic if needed before deletion
+	          
+	          accountRepository.deleteById(accountId);
+	          
+	          // Additional logic after deletion if needed
+	          
+	          return ResponseEntity.noContent().build();
+	      } else {
+	          return ResponseEntity.notFound().build();
+	      }
+	  }
+	  
+	  
+	  
 	  
 }
